@@ -100,6 +100,100 @@ body {
     font-size: 2.5rem;
 }
 
+.dashboard-card,
+.stat-card,
+.welcome-card {
+    border: 1px solid #e8ebf3;
+    border-radius: 1rem;
+    background: #fff;
+    box-shadow: 0 0.7rem 2rem rgb(35 48 90 / 6%);
+    transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.dashboard-card,
+.stat-card {
+    padding: 1.5rem;
+}
+
+.welcome-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.75rem;
+}
+
+.dashboard-card:hover,
+.stat-card:hover,
+.welcome-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 1rem 2.2rem rgb(35 48 90 / 10%);
+}
+
+.dashboard-button {
+    transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.dashboard-button:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgb(35 48 90 / 15%);
+}
+
+.stat-icon {
+    display: grid;
+    width: 2.75rem;
+    height: 2.75rem;
+    place-items: center;
+    margin-bottom: 1rem;
+    border-radius: 0.85rem;
+    font-size: 1.25rem;
+}
+
+.stat-icon-blue {
+    color: #3157d5;
+    background: #edf1ff;
+}
+
+.stat-icon-green {
+    color: #198754;
+    background: #e8f6ee;
+}
+
+.stat-icon-red {
+    color: #dc3545;
+    background: #fff0f1;
+}
+
+.stat-value {
+    color: var(--ink);
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.live-clock {
+    color: var(--brand-blue);
+    font-size: 1.65rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.work-timer-panel {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-radius: 0.85rem;
+    background: #f5f7fc;
+}
+
+.work-timer {
+    color: var(--ink);
+    font-size: 1.35rem;
+    font-variant-numeric: tabular-nums;
+}
+
 @keyframes card-enter {
     from {
         opacity: 0;
@@ -119,6 +213,16 @@ body {
 
     .navbar-text {
         display: none;
+    }
+
+    .welcome-card {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .dashboard-card,
+    .stat-card {
+        padding: 1.25rem;
     }
 }
 

@@ -4,10 +4,136 @@
 
 {% block content %}
 <section class="container py-5">
-    <div class="dashboard-placeholder">
-        <i class="bi bi-speedometer2"></i>
-        <h1 class="h3 mt-3">Admin Dashboard</h1>
-        <p class="text-secondary mb-0">Your admin dashboard will appear here.</p>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h1 class="h2 mb-1">Admin Dashboard</h1>
+            <p class="text-secondary mb-0">Staff overview for {{ today.strftime("%B %d, %Y") }}</p>
+        </div>
+        <button class="btn btn-primary dashboard-button" type="button" data-bs-toggle="modal"
+                data-bs-target="#addStaffModal">
+            <i class="bi bi-person-plus me-1"></i>Add Staff
+        </button>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="stat-card h-100">
+                <div class="stat-icon stat-icon-blue"><i class="bi bi-people"></i></div>
+                <p class="text-secondary mb-1">Total Staff</p>
+                <div class="stat-value">{{ total_staff }}</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card h-100">
+                <div class="stat-icon stat-icon-green"><i class="bi bi-person-check"></i></div>
+                <p class="text-secondary mb-1">Currently Checked In</p>
+                <div class="stat-value">{{ currently_checked_in }}</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card h-100">
+                <div class="stat-icon stat-icon-red"><i class="bi bi-person-x"></i></div>
+                <p class="text-secondary mb-1">Absent Today</p>
+                <div class="stat-value">{{ absent_today }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h5 mb-0">Staff</h2>
+        </div>
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Department</th>
+                        <th>Today's Status</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for staff in staff_members %}
+                        {% set attendance = latest_by_staff.get(staff.id) %}
+                        <tr>
+                            <td class="fw-semibold">{{ staff.name }}</td>
+                            <td>{{ staff.email }}</td>
+                            <td>{{ staff.department }}</td>
+                            <td>
+                                {% if attendance and attendance.logout_time is none %}
+                                    <span class="badge text-bg-success">Checked In</span>
+                                {% elif attendance %}
+                                    <span class="badge text-bg-secondary">Checked Out</span>
+                                {% else %}
+                                    <span class="badge text-bg-danger">Absent</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <form method="post" action="{{ url_for('delete_staff', staff_id=staff.id) }}"
+                                      onsubmit="return confirm('Delete this staff member and all attendance records?');">
+                                    <button class="btn btn-sm btn-outline-danger dashboard-button" type="submit">
+                                        <i class="bi bi-trash me-1"></i>Delete
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td class="text-center text-secondary py-4" colspan="5">No staff members yet.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </section>
+
+<div class="modal fade" id="addStaffModal" tabindex="-1" aria-labelledby="addStaffModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <form method="post" action="{{ url_for('add_staff') }}">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="addStaffModalLabel">Add Staff Member</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label" for="staff-name">Name</label>
+                        <input class="form-control" id="staff-name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="staff-email">Email</label>
+                        <input class="form-control" id="staff-email" type="email" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="staff-department">Department</label>
+                        <input class="form-control" id="staff-department" name="department" required>
+                    </div>
+                    <div>
+                        <label class="form-label" for="staff-password">Password</label>
+                        <input class="form-control" id="staff-password" type="password" name="password"
+                               autocomplete="new-password" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-light" type="button" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-primary dashboard-button" type="submit">Save Staff</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}
