@@ -194,6 +194,14 @@ body {
     font-variant-numeric: tabular-nums;
 }
 
+.staff-search-wrap {
+    width: min(100%, 320px);
+}
+
+.stat-value-time {
+    font-size: 1.45rem;
+}
+
 @keyframes card-enter {
     from {
         opacity: 0;

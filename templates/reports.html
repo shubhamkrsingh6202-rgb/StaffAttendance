@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Attendance Reports | Staff Attendance{% endblock %}
+
+{% block content %}
+<section class="container py-5">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h1 class="h2 mb-1">Attendance Reports</h1>
+            <p class="text-secondary mb-0">Review and export attendance records.</p>
+        </div>
+        <a class="btn btn-primary dashboard-button"
+           href="{{ url_for('export_admin_reports', staff_id=filters.staff_id, from_date=filters.from_date, to_date=filters.to_date, search=filters.search) }}">
+            <i class="bi bi-download me-1"></i>Export CSV
+        </a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="dashboard-card mb-4">
+        <form method="get" action="{{ url_for('admin_reports') }}" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label" for="report-staff">Staff</label>
+                <select class="form-select" id="report-staff" name="staff_id">
+                    <option value="">All staff</option>
+                    {% for staff in staff_members %}
+                        <option value="{{ staff.id }}" {% if filters.staff_id == staff.id|string %}selected{% endif %}>
+                            {{ staff.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label" for="from-date">From date</label>
+                <input class="form-control" id="from-date" type="date" name="from_date"
+                       value="{{ filters.from_date }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label" for="to-date">To date</label>
+                <input class="form-control" id="to-date" type="date" name="to_date"
+                       value="{{ filters.to_date }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" for="report-search">Name or department</label>
+                <input class="form-control" id="report-search" name="search"
+                       value="{{ filters.search }}" placeholder="Search...">
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button class="btn btn-primary dashboard-button flex-grow-1" type="submit">Apply</button>
+                <a class="btn btn-light dashboard-button" href="{{ url_for('admin_reports') }}">Reset</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="stat-card h-100">
+                <div class="stat-icon stat-icon-blue"><i class="bi bi-list-check"></i></div>
+                <p class="text-secondary mb-1">Total Records</p>
+                <div class="stat-value">{{ total_records }}</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card h-100">
+                <div class="stat-icon stat-icon-green"><i class="bi bi-clock-history"></i></div>
+                <p class="text-secondary mb-1">Total Working Hours</p>
+                <div class="stat-value stat-value-time">
+                    {{ "%02d:%02d:%02d"|format(total_seconds // 3600, (total_seconds % 3600) // 60, total_seconds % 60) }}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card h-100">
+                <div class="stat-icon stat-icon-red"><i class="bi bi-person-check"></i></div>
+                <p class="text-secondary mb-1">Staff Present</p>
+                <div class="stat-value">{{ present_count }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Staff Name</th>
+                        <th>Department</th>
+                        <th>Date</th>
+                        <th>Check-in</th>
+                        <th>Check-out</th>
+                        <th>Total Hours</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for attendance_row, staff, seconds in report_rows %}
+                        <tr>
+                            <td class="fw-semibold">{{ staff.name }}</td>
+                            <td>{{ staff.department }}</td>
+                            <td>{{ attendance_row.date.strftime("%b %d, %Y") }}</td>
+                            <td>{{ attendance_row.login_time.strftime("%I:%M:%S %p") if attendance_row.login_time else "&mdash;"|safe }}</td>
+                            <td>
+                                {% if attendance_row.logout_time %}
+                                    {{ attendance_row.logout_time.strftime("%I:%M:%S %p") }}
+                                {% else %}
+                                    <span class="badge text-bg-warning text-dark">Still working</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if attendance_row.logout_time %}
+                                    {{ "%02d:%02d:%02d"|format(seconds // 3600, (seconds % 3600) // 60, seconds % 60) }}
+                                {% else %}
+                                    <span class="text-secondary">Still working</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td class="text-center text-secondary py-4" colspan="6">No attendance records found.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

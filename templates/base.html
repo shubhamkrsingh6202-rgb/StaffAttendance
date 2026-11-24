@@ -16,6 +16,11 @@
             </a>
             {% if session.get("staff_id") %}
                 <div class="d-flex align-items-center gap-3">
+                    {% if session.get("role") == "admin" %}
+                        <a class="btn btn-outline-light btn-sm" href="{{ url_for('admin_reports') }}">
+                            <i class="bi bi-file-earmark-bar-graph me-1"></i>Reports
+                        </a>
+                    {% endif %}
                     <span class="navbar-text text-white">
                         {{ session.get("staff_name") }}
                     </span>

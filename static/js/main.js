@@ -19,19 +19,53 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const clock = document.querySelector("[data-live-clock]");
     const timer = document.querySelector("[data-start-time]");
-    const startTime = timer ? new Date(timer.dataset.startTime) : null;
+    const startTimeText = timer ? timer.dataset.startTime : null;
+    const staffSearch = document.querySelector("#staff-search");
+
+    if (staffSearch) {
+        staffSearch.addEventListener("input", () => {
+            const query = staffSearch.value.trim().toLowerCase();
+            document.querySelectorAll(".staff-row").forEach((row) => {
+                const text = row.dataset.staffSearch || "";
+                row.hidden = !text.includes(query);
+            });
+        });
+    }
+
+    function kolkataTimeParts() {
+        const parts = new Intl.DateTimeFormat("en-GB", {
+            timeZone: "Asia/Kolkata",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hourCycle: "h23",
+        }).formatToParts(new Date());
+        const values = {};
+        parts.forEach((part) => {
+            if (part.type !== "literal") values[part.type] = Number(part.value);
+        });
+        return values;
+    }
+
+    function secondsInDay(parts) {
+        return (parts.hour * 3600) + (parts.minute * 60) + parts.second;
+    }
 
     function updateClock() {
         if (clock) {
-            clock.textContent = new Date().toLocaleTimeString();
+            clock.textContent = new Intl.DateTimeFormat("en-IN", {
+                timeZone: "Asia/Kolkata",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+            }).format(new Date());
         }
 
-        if (timer && startTime) {
-            if (Number.isNaN(startTime.getTime())) {
-                timer.textContent = "Unavailable";
-                return;
-            }
-            const elapsed = Math.max(0, Math.floor((Date.now() - startTime.getTime()) / 1000));
+        if (timer && startTimeText) {
+            const startParts = startTimeText.split(":").map(Number);
+            if (startParts.length !== 3 || startParts.some(Number.isNaN)) return;
+            const startSeconds = (startParts[0] * 3600) + (startParts[1] * 60) + startParts[2];
+            const elapsed = Math.max(0, secondsInDay(kolkataTimeParts()) - startSeconds);
             const hours = String(Math.floor(elapsed / 3600)).padStart(2, "0");
             const minutes = String(Math.floor((elapsed % 3600) / 60)).padStart(2, "0");
             const seconds = String(elapsed % 60).padStart(2, "0");
