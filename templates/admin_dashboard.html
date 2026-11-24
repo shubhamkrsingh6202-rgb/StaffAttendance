@@ -3,64 +3,69 @@
 {% block title %}Admin Dashboard | Staff Attendance{% endblock %}
 
 {% block content %}
-<section class="container py-5">
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+<section class="container py-5 page-enter">
+    <div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
+            <p class="eyebrow mb-2">OVERVIEW</p>
             <h1 class="h2 mb-1">Admin Dashboard</h1>
-            <p class="text-secondary mb-0">Staff overview for {{ today.strftime("%B %d, %Y") }}</p>
+            <p class="text-secondary mb-0">Here is your team at a glance for {{ today.strftime("%B %d, %Y") }}.</p>
         </div>
         <button class="btn btn-primary dashboard-button" type="button" data-bs-toggle="modal"
                 data-bs-target="#addStaffModal">
-            <i class="bi bi-person-plus me-1"></i>Add Staff
+            <i class="bi bi-person-plus me-2" aria-hidden="true"></i>Add Staff
         </button>
     </div>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-
     <div class="row g-3 mb-4">
         <div class="col-md-4">
-            <div class="stat-card h-100">
-                <div class="stat-icon stat-icon-blue"><i class="bi bi-people"></i></div>
-                <p class="text-secondary mb-1">Total Staff</p>
+            <div class="stat-card stat-card-indigo stat-card-admin h-100">
+                <div class="stat-card-top">
+                    <span class="stat-icon"><i class="bi bi-people-fill" aria-hidden="true"></i></span>
+                    <span class="stat-card-label">TEAM SIZE</span>
+                </div>
+                <p class="stat-title">Total Staff</p>
                 <div class="stat-value">{{ total_staff }}</div>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="stat-card h-100">
-                <div class="stat-icon stat-icon-green"><i class="bi bi-person-check"></i></div>
-                <p class="text-secondary mb-1">Currently Checked In</p>
+            <div class="stat-card stat-card-green h-100">
+                <div class="stat-card-top">
+                    <span class="stat-icon"><i class="bi bi-person-check-fill" aria-hidden="true"></i></span>
+                    <span class="stat-card-label">LIVE STATUS</span>
+                </div>
+                <p class="stat-title">Checked In</p>
                 <div class="stat-value">{{ currently_checked_in }}</div>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="stat-card h-100">
-                <div class="stat-icon stat-icon-red"><i class="bi bi-person-x"></i></div>
-                <p class="text-secondary mb-1">Absent Today</p>
+            <div class="stat-card stat-card-orange h-100">
+                <div class="stat-card-top">
+                    <span class="stat-icon"><i class="bi bi-person-dash-fill" aria-hidden="true"></i></span>
+                    <span class="stat-card-label">NEEDS ATTENTION</span>
+                </div>
+                <p class="stat-title">Absent Today</p>
                 <div class="stat-value">{{ absent_today }}</div>
             </div>
         </div>
     </div>
 
     <div class="dashboard-card">
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
-            <h2 class="h5 mb-0">Staff</h2>
+        <div class="table-toolbar d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+            <div>
+                <h2 class="h5 mb-1">Staff directory</h2>
+                <p class="text-secondary small mb-0">Manage your team and today's attendance.</p>
+            </div>
             <div class="staff-search-wrap">
                 <label class="visually-hidden" for="staff-search">Search staff</label>
-                <input class="form-control" id="staff-search" type="search"
-                       placeholder="Search name, email, or department">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search" aria-hidden="true"></i></span>
+                    <input class="form-control" id="staff-search" type="search"
+                           placeholder="Search name, email, or department">
+                </div>
             </div>
         </div>
         <div class="table-responsive">
-            <table class="table align-middle mb-0">
+            <table class="table align-middle app-table mb-0">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -75,29 +80,41 @@
                         {% set attendance = latest_by_staff.get(staff.id) %}
                         <tr class="staff-row"
                             data-staff-search="{{ (staff.name ~ ' ' ~ staff.email ~ ' ' ~ staff.department)|lower }}">
-                            <td class="fw-semibold">{{ staff.name }}</td>
+                            <td>
+                                {% set name_parts = staff.name.split() %}
+                                <div class="staff-identity">
+                                    <span class="staff-avatar" aria-hidden="true">
+                                        {{ (name_parts[0][0] ~ (name_parts[-1][0] if name_parts|length > 1 else ""))|upper }}
+                                    </span>
+                                    <span class="fw-semibold">{{ staff.name }}</span>
+                                </div>
+                            </td>
                             <td>{{ staff.email }}</td>
                             <td>{{ staff.department }}</td>
                             <td>
                                 {% if attendance and attendance.logout_time is none %}
-                                    <span class="badge text-bg-success">Checked In</span>
+                                    <span class="status-pill status-checked-in">Checked In</span>
                                 {% elif attendance %}
-                                    <span class="badge text-bg-secondary">Checked Out</span>
+                                    <span class="status-pill status-checked-out">Checked Out</span>
                                 {% else %}
-                                    <span class="badge text-bg-danger">Absent</span>
+                                    <span class="status-pill status-absent">Absent</span>
                                 {% endif %}
                             </td>
                             <td class="text-end">
-                                <div class="d-flex justify-content-end gap-2">
-                                    <button class="btn btn-sm btn-outline-primary dashboard-button" type="button"
+                                <div class="table-actions d-flex justify-content-end gap-2">
+                                    <button class="btn btn-icon btn-edit dashboard-button" type="button"
                                             data-bs-toggle="modal"
-                                            data-bs-target="#editStaffModal{{ staff.id }}">
-                                        <i class="bi bi-pencil me-1"></i>Edit
+                                            data-bs-target="#editStaffModal{{ staff.id }}"
+                                            data-bs-title="Edit staff"
+                                            aria-label="Edit {{ staff.name }}">
+                                        <i class="bi bi-pencil-square" aria-hidden="true"></i>
                                     </button>
                                     <form method="post" action="{{ url_for('delete_staff', staff_id=staff.id) }}"
                                           onsubmit="return confirm('Delete this staff member and all attendance records?');">
-                                        <button class="btn btn-sm btn-outline-danger dashboard-button" type="submit">
-                                            <i class="bi bi-trash me-1"></i>Delete
+                                        <button class="btn btn-icon btn-delete dashboard-button" type="submit"
+                                                data-bs-title="Delete staff"
+                                                aria-label="Delete {{ staff.name }}">
+                                            <i class="bi bi-trash3" aria-hidden="true"></i>
                                         </button>
                                     </form>
                                 </div>
@@ -105,7 +122,11 @@
                         </tr>
                     {% else %}
                         <tr>
-                            <td class="text-center text-secondary py-4" colspan="5">No staff members yet.</td>
+                            <td class="empty-state" colspan="5">
+                                <i class="bi bi-people" aria-hidden="true"></i>
+                                <strong>No staff members yet</strong>
+                                <span>Add your first staff member to get started.</span>
+                            </td>
                         </tr>
                     {% endfor %}
                 </tbody>

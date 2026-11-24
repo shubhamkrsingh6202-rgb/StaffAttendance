@@ -3,66 +3,84 @@
 {% block title %}{{ "Admin" if role == "admin" else "Staff" }} Login | Staff Attendance{% endblock %}
 
 {% block content %}
-<section class="login-page login-page-{{ role }}">
-    <div class="login-card login-card-{{ role }}">
-        <div class="login-heading text-center">
-            <div class="login-logo login-logo-{{ role }}">
-                <i class="{{ 'bi bi-shield-lock' if role == 'admin' else 'bi bi-person-badge' }}"></i>
-            </div>
-            <h1 class="h3 mt-3 mb-2">{{ "Admin Login" if role == "admin" else "Staff Login" }}</h1>
-            <p class="text-secondary mb-0">
-                Sign in to your {{ "admin" if role == "admin" else "staff" }} account
-            </p>
-        </div>
+<section class="login-page login-page-{{ role }} page-enter">
+    <div class="container">
+        <div class="auth-layout">
+            <aside class="auth-panel auth-panel-{{ role }}">
+                <a class="auth-brand" href="{{ url_for('home') }}">
+                    <span class="auth-brand-icon"><i class="bi bi-calendar2-check" aria-hidden="true"></i></span>
+                    <span>Staff Attendance</span>
+                </a>
+                <div class="auth-panel-main">
+                    <span class="auth-panel-icon">
+                        <i class="{{ 'bi bi-shield-lock-fill' if role == 'admin' else 'bi bi-person-badge-fill' }}"
+                           aria-hidden="true"></i>
+                    </span>
+                    <h2>{{ "Everything your team needs to stay on track." if role == "admin" else "Your workday, all in one place." }}</h2>
+                    <p>{{ "A clear view of your people, attendance, and hours." if role == "admin" else "A simple way to track attendance and working hours." }}</p>
+                    <ul class="auth-feature-list">
+                        {% if role == "admin" %}
+                            <li><i class="bi bi-check-circle-fill" aria-hidden="true"></i><span>Manage your staff with ease</span></li>
+                            <li><i class="bi bi-check-circle-fill" aria-hidden="true"></i><span>See today's attendance at a glance</span></li>
+                            <li><i class="bi bi-check-circle-fill" aria-hidden="true"></i><span>Filter and export detailed reports</span></li>
+                        {% else %}
+                            <li><i class="bi bi-check-circle-fill" aria-hidden="true"></i><span>Check in and out in a moment</span></li>
+                            <li><i class="bi bi-check-circle-fill" aria-hidden="true"></i><span>Keep track of today's hours</span></li>
+                            <li><i class="bi bi-check-circle-fill" aria-hidden="true"></i><span>Review your attendance history</span></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="auth-panel-footer">A smoother day starts here.</div>
+            </aside>
 
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div class="mt-4">
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <div class="auth-form-panel">
+                <div class="auth-form-heading">
+                    <span class="auth-form-icon auth-form-icon-{{ role }}">
+                        <i class="{{ 'bi bi-shield-lock-fill' if role == 'admin' else 'bi bi-person-fill' }}"
+                           aria-hidden="true"></i>
+                    </span>
+                    <p class="eyebrow mb-2">{{ "ADMIN PORTAL" if role == "admin" else "STAFF PORTAL" }}</p>
+                    <h1>{{ "Admin Login" if role == "admin" else "Staff Login" }}</h1>
+                    <p class="text-muted mb-0">Sign in to your {{ "admin" if role == "admin" else "staff" }} account.</p>
+                </div>
+
+                <form method="post" class="auth-form">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email address</label>
+                        <div class="input-group auth-input-group">
+                            <span class="input-group-text"><i class="bi bi-envelope" aria-hidden="true"></i></span>
+                            <input type="email" class="form-control" id="email" name="email"
+                                   placeholder="name@college.com" autocomplete="username" required>
                         </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}
-
-        <form method="post" class="mt-4">
-            <div class="mb-3">
-                <label for="email" class="form-label">Email address</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                    <input type="email" class="form-control" id="email" name="email"
-                           placeholder="name@college.com" autocomplete="username" required>
-                </div>
-            </div>
-            <div class="mb-4">
-                <label for="password" class="form-label">Password</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                    <input type="password" class="form-control" id="password" name="password"
-                           placeholder="Enter your password" autocomplete="current-password" required>
-                    <button class="btn btn-outline-secondary password-toggle" type="button"
-                            aria-label="Show password" aria-pressed="false">
-                        <i class="bi bi-eye" aria-hidden="true"></i>
+                    </div>
+                    <div class="mb-4">
+                        <label for="password" class="form-label">Password</label>
+                        <div class="input-group auth-input-group">
+                            <span class="input-group-text"><i class="bi bi-lock" aria-hidden="true"></i></span>
+                            <input type="password" class="form-control" id="password" name="password"
+                                   placeholder="Enter your password" autocomplete="current-password" required>
+                            <button class="btn btn-outline-secondary password-toggle" type="button"
+                                    aria-label="Show password" aria-pressed="false">
+                                <i class="bi bi-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 login-button login-button-{{ role }}">
+                        <span>Login</span><i class="bi bi-arrow-right ms-2" aria-hidden="true"></i>
                     </button>
+                </form>
+
+                <div class="login-links">
+                    <p class="mb-2">
+                        {% if role == "admin" %}
+                            Staff member? <a href="{{ url_for('staff_login') }}">Staff Login</a>
+                        {% else %}
+                            Admin? <a href="{{ url_for('admin_login') }}">Admin Login</a>
+                        {% endif %}
+                    </p>
+                    <a href="{{ url_for('home') }}"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i>Back to home</a>
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary w-100 login-button login-button-{{ role }}">
-                Login <i class="bi bi-arrow-right ms-1"></i>
-            </button>
-        </form>
-
-        <div class="login-links mt-4 text-center">
-            <p class="mb-2">
-                {% if role == "admin" %}
-                    Staff member? <a href="{{ url_for('staff_login') }}">Staff Login</a>
-                {% else %}
-                    Admin? <a href="{{ url_for('admin_login') }}">Admin Login</a>
-                {% endif %}
-            </p>
-            <a href="{{ url_for('home') }}">Back to home</a>
         </div>
     </div>
 </section>

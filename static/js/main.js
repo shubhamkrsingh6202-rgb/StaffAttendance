@@ -1,4 +1,35 @@
 document.addEventListener("DOMContentLoaded", () => {
+    const root = document.documentElement;
+    const themeToggle = document.querySelector("#theme-toggle");
+    const themeIcon = document.querySelector("[data-theme-icon]");
+
+    // Restore the saved color scheme on every page.
+    function setTheme(theme) {
+        root.dataset.theme = theme;
+        if (themeToggle) {
+            const isDark = theme === "dark";
+            themeToggle.setAttribute("aria-pressed", String(isDark));
+            themeToggle.setAttribute(
+                "aria-label",
+                isDark ? "Switch to light mode" : "Switch to dark mode"
+            );
+        }
+        if (themeIcon) {
+            themeIcon.classList.toggle("bi-moon-stars-fill", theme !== "dark");
+            themeIcon.classList.toggle("bi-sun-fill", theme === "dark");
+        }
+    }
+
+    setTheme(localStorage.getItem("staffAttendanceTheme") === "dark" ? "dark" : "light");
+
+    if (themeToggle) {
+        themeToggle.addEventListener("click", () => {
+            const nextTheme = root.dataset.theme === "dark" ? "light" : "dark";
+            localStorage.setItem("staffAttendanceTheme", nextTheme);
+            setTheme(nextTheme);
+        });
+    }
+
     const passwordInput = document.querySelector("#password");
     const toggleButton = document.querySelector(".password-toggle");
 
@@ -31,6 +62,40 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
     }
+
+    document.querySelectorAll("[data-toast-message]").forEach((toastElement) => {
+        bootstrap.Toast.getOrCreateInstance(toastElement).show();
+    });
+
+    document.querySelectorAll("[data-bs-title]").forEach((tooltipElement) => {
+        bootstrap.Tooltip.getOrCreateInstance(tooltipElement);
+    });
+
+    document.querySelectorAll("form").forEach((form) => {
+        form.addEventListener("submit", (event) => {
+            if (event.defaultPrevented) return;
+            if (form.dataset.submitting === "true") {
+                event.preventDefault();
+                return;
+            }
+
+            const submitButton = event.submitter;
+            if (!submitButton || submitButton.disabled) return;
+
+            // Disable repeat submissions while the request is being sent.
+            form.dataset.submitting = "true";
+            submitButton.disabled = true;
+            submitButton.setAttribute("aria-busy", "true");
+
+            const spinner = document.createElement("span");
+            spinner.className = "spinner-border spinner-border-sm me-2";
+            spinner.setAttribute("aria-hidden", "true");
+
+            const label = document.createElement("span");
+            label.textContent = submitButton.dataset.loadingLabel || "Please wait...";
+            submitButton.replaceChildren(spinner, label);
+        });
+    });
 
     function kolkataTimeParts() {
         const parts = new Intl.DateTimeFormat("en-GB", {

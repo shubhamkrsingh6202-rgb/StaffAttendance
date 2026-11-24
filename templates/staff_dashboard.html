@@ -3,51 +3,69 @@
 {% block title %}Staff Dashboard | Staff Attendance{% endblock %}
 
 {% block content %}
-<section class="container py-5">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-
-    <div class="welcome-card mb-4">
+<section class="container py-5 dashboard-page page-enter">
+    <div class="staff-welcome mb-4">
         <div>
-            <p class="text-secondary mb-1">Welcome back</p>
-            <h1 class="h2 mb-1">{{ staff_member.name }}</h1>
-            <p class="mb-0 text-secondary">{{ staff_member.department }} <span class="mx-1">&middot;</span>
+            <p class="eyebrow mb-2">YOUR WORKSPACE</p>
+            <h1 class="h2 mb-1">Good to see you, {{ staff_member.name.split()[0] }}!</h1>
+            <p class="text-secondary mb-0">{{ staff_member.department }} <span class="mx-1">&middot;</span>
                 {{ today.strftime("%A, %B %d, %Y") }}</p>
         </div>
-        <div class="clock-panel text-md-end">
-            <div class="small text-secondary">Current time</div>
+        <div class="clock-card">
+            <span class="clock-label"><i class="bi bi-clock me-2" aria-hidden="true"></i>LOCAL TIME</span>
             <div class="live-clock" data-live-clock>--:--:--</div>
+            <span class="clock-zone">Kolkata, India</span>
         </div>
     </div>
 
-    <div class="row g-3 mb-4">
+    <div class="row g-4 mb-4">
+        <div class="col-lg-5">
+            <div class="dashboard-card attendance-status-card h-100 {% if is_checked_in %}is-checked-in{% endif %}">
+                <p class="eyebrow mb-3">TODAY'S ATTENDANCE</p>
+                <div class="status-ring {% if is_checked_in %}status-ring-active{% endif %}">
+                    <span class="status-ring-inner">
+                        <i class="bi {{ 'bi-check-lg' if is_checked_in else 'bi-calendar2-check' }}"
+                           aria-hidden="true"></i>
+                    </span>
+                </div>
+                <h2 class="h4 mt-4 mb-2">Today's status</h2>
+                <span class="status-pill {% if today_status == 'Checked In' %}status-checked-in{% elif today_status == 'Checked Out' %}status-checked-out{% else %}status-absent{% endif %}">
+                    {{ today_status }}
+                </span>
+                <p class="text-secondary small mt-3 mb-0">
+                    {% if is_checked_in %}
+                        Your work session is in progress.
+                    {% elif today_status == "Checked Out" %}
+                        Your attendance for today is complete.
+                    {% else %}
+                        Start your day by checking in.
+                    {% endif %}
+                </p>
+            </div>
+        </div>
         <div class="col-lg-7">
-            <div class="dashboard-card h-100">
-                <h2 class="h5 mb-3">Attendance</h2>
+            <div class="dashboard-card attendance-actions-card h-100">
+                <p class="eyebrow mb-2">QUICK ACTIONS</p>
+                <h2 class="h4 mb-4">Manage your workday</h2>
                 <div class="d-flex flex-wrap gap-3">
                     <form method="post" action="{{ url_for('check_in') }}">
-                        <button class="btn btn-success btn-lg dashboard-button px-4" type="submit"
+                        <button class="btn btn-success btn-lg dashboard-button attendance-button px-4" type="submit"
                                 {% if is_checked_in %}disabled{% endif %}>
-                            <i class="bi bi-box-arrow-in-right me-2"></i>Check In
+                            <i class="bi bi-box-arrow-in-right me-2" aria-hidden="true"></i>Check In
                         </button>
                     </form>
                     <form method="post" action="{{ url_for('check_out') }}">
-                        <button class="btn btn-danger btn-lg dashboard-button px-4" type="submit"
+                        <button class="btn btn-danger btn-lg dashboard-button attendance-button px-4" type="submit"
                                 {% if not is_checked_in %}disabled{% endif %}>
-                            <i class="bi bi-box-arrow-right me-2"></i>Check Out
+                            <i class="bi bi-box-arrow-right me-2" aria-hidden="true"></i>Check Out
                         </button>
                     </form>
                 </div>
                 <div class="work-timer-panel mt-4">
-                    <span class="text-secondary">Working hours today</span>
+                    <div>
+                        <span class="work-timer-label">Working hours today</span>
+                        <span class="work-timer-caption">Time since your check-in</span>
+                    </div>
                     {% if is_checked_in and checkin_datetime %}
                         <strong class="work-timer" data-start-time="{{ checkin_datetime }}">00:00:00</strong>
                     {% else %}
@@ -56,52 +74,50 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-5">
-            <div class="dashboard-card h-100 d-flex flex-column justify-content-center">
-                <div class="stat-icon stat-icon-blue mb-3"><i class="bi bi-calendar-check"></i></div>
-                <h2 class="h5">Today's status</h2>
-                <p class="mb-0">
-                    {% if today_status == "Checked In" %}
-                        <span class="badge text-bg-success">{{ today_status }}</span>
-                    {% elif today_status == "Checked Out" %}
-                        <span class="badge text-bg-secondary">{{ today_status }}</span>
-                    {% else %}
-                        <span class="badge text-bg-danger">{{ today_status }}</span>
-                    {% endif %}
-                </p>
-            </div>
-        </div>
     </div>
 
     <div class="dashboard-card">
-        <h2 class="h5 mb-3">My Attendance History</h2>
+        <div class="table-toolbar">
+            <div>
+                <p class="eyebrow mb-2">YOUR RECORDS</p>
+                <h2 class="h4 mb-1">Attendance history</h2>
+                <p class="text-secondary small mb-0">Your most recent attendance entries.</p>
+            </div>
+            <span class="table-heading-icon"><i class="bi bi-journal-check" aria-hidden="true"></i></span>
+        </div>
         <div class="table-responsive">
-            <table class="table align-middle mb-0">
+            <table class="table align-middle app-table table-striped mb-0">
                 <thead>
                     <tr>
-                        <th>Date</th>
-                        <th>Check-in time</th>
-                        <th>Check-out time</th>
-                        <th>Total hours</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Check-in time</th>
+                        <th scope="col">Check-out time</th>
+                        <th scope="col">Total hours</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for row, total_seconds in history %}
                         <tr>
-                            <td>{{ row.date.strftime("%b %d, %Y") }}</td>
+                            <td class="fw-semibold">{{ row.date.strftime("%b %d, %Y") }}</td>
                             <td>{{ row.login_time.strftime("%I:%M:%S %p") if row.login_time else "&mdash;"|safe }}</td>
                             <td>{{ row.logout_time.strftime("%I:%M:%S %p") if row.logout_time else "&mdash;"|safe }}</td>
                             <td>
                                 {% if total_seconds is not none %}
-                                    {{ "%02d:%02d:%02d"|format(total_seconds // 3600, (total_seconds % 3600) // 60, total_seconds % 60) }}
+                                    <span class="hours-badge">
+                                        {{ "%02d:%02d:%02d"|format(total_seconds // 3600, (total_seconds % 3600) // 60, total_seconds % 60) }}
+                                    </span>
                                 {% else %}
-                                    &mdash;
+                                    <span class="hours-badge hours-badge-muted">&mdash;</span>
                                 {% endif %}
                             </td>
                         </tr>
                     {% else %}
                         <tr>
-                            <td class="text-center text-secondary py-4" colspan="4">No attendance records yet.</td>
+                            <td class="empty-state" colspan="4">
+                                <i class="bi bi-calendar2-x" aria-hidden="true"></i>
+                                <strong>No attendance records yet</strong>
+                                <span>Your check-in history will appear here.</span>
+                            </td>
                         </tr>
                     {% endfor %}
                 </tbody>
