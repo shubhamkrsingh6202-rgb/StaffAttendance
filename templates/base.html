@@ -28,6 +28,11 @@
                         <i class="bi bi-box-arrow-right me-1"></i>Logout
                     </a>
                 </div>
+            {% else %}
+                <div class="d-flex align-items-center gap-2">
+                    <a class="btn btn-outline-light btn-sm" href="{{ url_for('admin_login') }}">Admin Login</a>
+                    <a class="btn btn-outline-light btn-sm" href="{{ url_for('staff_login') }}">Staff Login</a>
+                </div>
             {% endif %}
         </div>
     </nav>

@@ -86,6 +86,117 @@ body {
     box-shadow: 0 0.6rem 1.2rem rgb(70 76 185 / 25%);
 }
 
+.login-page-admin {
+    background: linear-gradient(135deg, #eaf0ff 0%, #f5f8ff 55%, #e8f5ff 100%);
+}
+
+.login-page-staff {
+    background: linear-gradient(135deg, #e8f6ee 0%, #f5fbf7 55%, #e5f5ec 100%);
+}
+
+.login-logo-admin {
+    background: linear-gradient(135deg, #3157d5, #4978ed);
+}
+
+.login-logo-staff {
+    background: linear-gradient(135deg, #198754, #36a66b);
+}
+
+.login-button-admin {
+    background: linear-gradient(110deg, #3157d5, #4978ed);
+}
+
+.login-button-admin:hover {
+    box-shadow: 0 0.6rem 1.2rem rgb(49 87 213 / 25%);
+}
+
+.login-button-staff {
+    background: linear-gradient(110deg, #198754, #36a66b);
+}
+
+.login-button-staff:hover {
+    box-shadow: 0 0.6rem 1.2rem rgb(25 135 84 / 25%);
+}
+
+.login-links a {
+    color: var(--brand-blue);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.login-page-staff .login-links a {
+    color: #198754;
+}
+
+.login-links a:hover {
+    text-decoration: underline;
+}
+
+.home-page {
+    min-height: calc(100vh - 56px);
+    display: flex;
+    align-items: center;
+    padding: 3rem 0;
+    background: linear-gradient(135deg, #f3f6ff 0%, #fff 50%, #eff8f2 100%);
+}
+
+.home-card {
+    height: 100%;
+    padding: 2.5rem;
+    border: 1px solid #e8ebf3;
+    border-radius: 1.25rem;
+    background: #fff;
+    box-shadow: 0 0.7rem 2rem rgb(35 48 90 / 8%);
+    transition: transform 220ms ease, box-shadow 220ms ease;
+}
+
+.home-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 1.2rem 2.5rem rgb(35 48 90 / 14%);
+}
+
+.home-card-icon {
+    display: inline-grid;
+    width: 5rem;
+    height: 5rem;
+    place-items: center;
+    border-radius: 1.25rem;
+    font-size: 2.25rem;
+}
+
+.home-card-admin .home-card-icon {
+    color: #3157d5;
+    background: #edf1ff;
+}
+
+.home-card-staff .home-card-icon {
+    color: #198754;
+    background: #e8f6ee;
+}
+
+.home-card-admin .home-card-button {
+    color: #fff;
+    background: linear-gradient(110deg, #3157d5, #4978ed);
+}
+
+.home-card-staff .home-card-button {
+    color: #fff;
+    background: linear-gradient(110deg, #198754, #36a66b);
+}
+
+.home-card-button {
+    min-width: 10rem;
+    padding: 0.75rem 1.25rem;
+    font-weight: 600;
+    transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.home-card-button:hover {
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 0.6rem 1.2rem rgb(35 48 90 / 18%);
+}
+
 .dashboard-placeholder {
     padding: 3rem 1rem;
     border: 1px solid #e8ebf3;

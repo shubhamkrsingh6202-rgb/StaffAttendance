@@ -1,16 +1,18 @@
 {% extends "base.html" %}
 
-{% block title %}Login | Staff Attendance{% endblock %}
+{% block title %}{{ "Admin" if role == "admin" else "Staff" }} Login | Staff Attendance{% endblock %}
 
 {% block content %}
-<section class="login-page">
-    <div class="login-card">
+<section class="login-page login-page-{{ role }}">
+    <div class="login-card login-card-{{ role }}">
         <div class="login-heading text-center">
-            <div class="login-logo">
-                <i class="bi bi-person-badge"></i>
+            <div class="login-logo login-logo-{{ role }}">
+                <i class="{{ 'bi bi-shield-lock' if role == 'admin' else 'bi bi-person-badge' }}"></i>
             </div>
-            <h1 class="h3 mt-3 mb-2">Welcome back</h1>
-            <p class="text-secondary mb-0">Sign in to your staff account</p>
+            <h1 class="h3 mt-3 mb-2">{{ "Admin Login" if role == "admin" else "Staff Login" }}</h1>
+            <p class="text-secondary mb-0">
+                Sign in to your {{ "admin" if role == "admin" else "staff" }} account
+            </p>
         </div>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -47,10 +49,21 @@
                     </button>
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary w-100 login-button">
+            <button type="submit" class="btn btn-primary w-100 login-button login-button-{{ role }}">
                 Login <i class="bi bi-arrow-right ms-1"></i>
             </button>
         </form>
+
+        <div class="login-links mt-4 text-center">
+            <p class="mb-2">
+                {% if role == "admin" %}
+                    Staff member? <a href="{{ url_for('staff_login') }}">Staff Login</a>
+                {% else %}
+                    Admin? <a href="{{ url_for('admin_login') }}">Admin Login</a>
+                {% endif %}
+            </p>
+            <a href="{{ url_for('home') }}">Back to home</a>
+        </div>
     </div>
 </section>
 {% endblock %}

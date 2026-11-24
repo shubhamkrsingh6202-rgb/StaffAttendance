@@ -54,34 +54,78 @@ def create_database():
 
 @app.route("/")
 def home():
-    return redirect(url_for("login"))
+    staff_member = get_signed_in_staff()
+    if staff_member is not None:
+        if staff_member.role == "admin":
+            return redirect(url_for("admin_dashboard"))
+        if staff_member.role == "staff":
+            return redirect(url_for("staff_dashboard"))
+    elif session.get("staff_id") is not None:
+        session.clear()
+
+    return render_template("home.html")
 
 
-@app.route("/login", methods=["GET", "POST"])
-def login():
+def login_for_role(role):
+    if session.get("staff_id") is not None and session.get("role") != role:
+        session.clear()
+
     if request.method == "POST":
         email = request.form.get("email", "").strip()
         password = request.form.get("password", "")
         staff_member = Staff.query.filter_by(email=email).first()
 
-        if staff_member and check_password_hash(staff_member.password_hash, password):
+        if staff_member is None or not check_password_hash(
+            staff_member.password_hash, password
+        ):
+            flash("Incorrect email or password.", "danger")
+        elif staff_member.role != role:
+            if role == "admin":
+                flash(
+                    "This account is not an admin account. Please use Staff Login.",
+                    "danger",
+                )
+            else:
+                flash(
+                    "This is an admin account. Please use Admin Login.",
+                    "danger",
+                )
+        else:
+            session.clear()
             session["staff_id"] = staff_member.id
             session["staff_name"] = staff_member.name
             session["role"] = staff_member.role
+            dashboard = "admin_dashboard" if role == "admin" else "staff_dashboard"
+            return redirect(url_for(dashboard))
 
-            if staff_member.role == "admin":
-                return redirect(url_for("admin_dashboard"))
-            return redirect(url_for("staff_dashboard"))
+    return render_template("login.html", role=role)
 
-        flash("Incorrect email or password. Please try again.", "danger")
 
-    return render_template("login.html")
+@app.route("/admin/login", methods=["GET", "POST"])
+def admin_login():
+    return login_for_role("admin")
+
+
+@app.route("/staff/login", methods=["GET", "POST"])
+def staff_login():
+    return login_for_role("staff")
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    return redirect(url_for("home"))
 
 
 @app.route("/logout")
 def logout():
+    role = session.get("role")
     session.clear()
-    return redirect(url_for("login"))
+    flash("You have been logged out.", "success")
+    if role == "admin":
+        return redirect(url_for("admin_login"))
+    if role == "staff":
+        return redirect(url_for("staff_login"))
+    return redirect(url_for("home"))
 
 
 def get_signed_in_staff():
@@ -96,7 +140,7 @@ def staff_dashboard():
     staff_member = get_signed_in_staff()
     if staff_member is None or staff_member.role != "staff":
         session.clear()
-        return redirect(url_for("login"))
+        return redirect(url_for("staff_login"))
 
     today = kolkata_today()
     attendance_rows = (
@@ -153,7 +197,7 @@ def check_in():
     staff_member = get_signed_in_staff()
     if staff_member is None or staff_member.role != "staff":
         session.clear()
-        return redirect(url_for("login"))
+        return redirect(url_for("staff_login"))
 
     today = kolkata_today()
     open_checkin = Attendance.query.filter_by(
@@ -179,7 +223,7 @@ def check_out():
     staff_member = get_signed_in_staff()
     if staff_member is None or staff_member.role != "staff":
         session.clear()
-        return redirect(url_for("login"))
+        return redirect(url_for("staff_login"))
 
     open_checkin = (
         Attendance.query.filter_by(
@@ -202,7 +246,7 @@ def admin_dashboard():
     admin = get_signed_in_staff()
     if admin is None or admin.role != "admin":
         session.clear()
-        return redirect(url_for("login"))
+        return redirect(url_for("admin_login"))
 
     today = kolkata_today()
     staff_members = Staff.query.filter_by(role="staff").order_by(Staff.name).all()
@@ -239,7 +283,7 @@ def add_staff():
     admin = get_signed_in_staff()
     if admin is None or admin.role != "admin":
         session.clear()
-        return redirect(url_for("login"))
+        return redirect(url_for("admin_login"))
 
     name = request.form.get("name", "").strip()
     email = request.form.get("email", "").strip().lower()
@@ -269,7 +313,7 @@ def delete_staff(staff_id):
     admin = get_signed_in_staff()
     if admin is None or admin.role != "admin":
         session.clear()
-        return redirect(url_for("login"))
+        return redirect(url_for("admin_login"))
 
     staff_member = db.session.get(Staff, staff_id)
     if staff_member is None:
@@ -289,7 +333,7 @@ def edit_staff(staff_id):
     admin = get_signed_in_staff()
     if admin is None or admin.role != "admin":
         session.clear()
-        return redirect(url_for("login"))
+        return redirect(url_for("admin_login"))
 
     staff_member = db.session.get(Staff, staff_id)
     if staff_member is None:
@@ -386,7 +430,7 @@ def admin_reports():
     admin = get_signed_in_staff()
     if admin is None or admin.role != "admin":
         session.clear()
-        return redirect(url_for("login"))
+        return redirect(url_for("admin_login"))
 
     staff_members = Staff.query.filter_by(role="staff").order_by(Staff.name).all()
     joined_rows = get_filtered_attendance()
@@ -421,7 +465,7 @@ def export_admin_reports():
     admin = get_signed_in_staff()
     if admin is None or admin.role != "admin":
         session.clear()
-        return redirect(url_for("login"))
+        return redirect(url_for("admin_login"))
 
     joined_rows = get_filtered_attendance()
     output = StringIO()
